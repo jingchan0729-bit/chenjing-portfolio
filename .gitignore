@@ -1,0 +1,18 @@
+node_modules
+dist
+dist-ssr
+*.local
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+.idea
+_scratch
+
+# 原始素材与生成中间产物：只在本机留档，不进仓库
+images-src
+sofa-new-shots_assets
+*.miora
+dist-upload.zip
+
+# 本机工作记录，不进仓库
+.workbuddy/

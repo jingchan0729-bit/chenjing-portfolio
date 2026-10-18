@@ -1,0 +1,13 @@
+# 原始素材与生成中间产物：只在本机留档，不上传部署
+images-src
+sofa-new-shots_assets
+*.miora
+_scratch
+
+# 构建产物由 Vercel 自己生成
+dist
+dist-ssr
+
+# 本机临时脚本（保留 start-site.bat 不在此列）
+*.cjs
+*.log

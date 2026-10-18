@@ -1,0 +1,211 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------
+   Design tokens
+   Values traced from the reference site (type scale, greys, chip fills)
+   ------------------------------------------------------------------ */
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Instrument Serif", "Times New Roman", Georgia, serif;
+  --font-mono: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-micro: "Azeret Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --color-ink: #030303;
+  --color-body: #323232;
+  --color-muted: #696969;
+  --color-soft: #999999;
+  --color-line: #e6e6e6;
+  --color-chip: #f0f0f0;
+  --color-chip-alt: #f2f2f2;
+
+  --animate-marquee: marquee 130s linear infinite;
+
+  @keyframes marquee {
+    from {
+      transform: translate3d(0, 0, 0);
+    }
+    to {
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: #ffffff;
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-synthesis-weight: none;
+  }
+
+  ::selection {
+    background-color: #030303;
+    color: #ffffff;
+  }
+
+  /* Keep focus visible but quiet, in keeping with the restrained palette */
+  :focus-visible {
+    outline: 1px solid var(--color-ink);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+}
+
+@layer components {
+  /* Scroll reveal — opacity/translate only, no gimmicks */
+  .reveal {
+    opacity: 0;
+    transform: translateY(14px);
+    transition:
+      opacity 900ms cubic-bezier(0.22, 1, 0.36, 1),
+      transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+  }
+
+  .reveal[data-visible="true"] {
+    opacity: 1;
+    transform: none;
+    /* 淡入完成后释放合成层：画廊里同时有十几二十个 reveal，
+       常驻 will-change 会让每个都独占一层，移动端内存吃不消 */
+    will-change: auto;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .reveal {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /**
+   * 图片解码完成后淡入。
+   * 站里有 70 多张图，直接「啪」地出现会打断版面的安静感，
+   * 也不利于判断图是否真的加载完了。占位底色由父容器提供。
+   * 注意：必须在挂载时检查 complete，否则缓存命中的图不会触发 load 事件、永远透明。
+   */
+  /**
+   * 用 animation 而不是 transition：
+   * 图片上还挂着 Tailwind 的 transition-transform（悬停微放大），
+   * 那条规则会覆盖 transition-property，把 opacity 的过渡一并吃掉。
+   * animation 与 transition 各走各的，互不干扰。
+   */
+  @keyframes img-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  .img-fade {
+    opacity: 0;
+  }
+
+  .img-fade[data-loaded="true"] {
+    animation: img-in 800ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .img-fade {
+      opacity: 1;
+    }
+  }
+
+  /* 入场：只用于页面/区块挂载时的一次性淡入上浮，不做循环、不参与滚动触发 */
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .animate-rise {
+    animation: rise 800ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /**
+   * 桌面导航的下划线扫入。
+   * 印刷感的站点里，hover 变化应该是「一条线长出来」而不是变淡，
+   * 变淡（opacity）会让文字在悬停时反而更难读。
+   */
+  .nav-underline {
+    position: relative;
+  }
+
+  .nav-underline::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -4px;
+    height: 1px;
+    background-color: currentColor;
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .nav-underline:hover::after,
+  .nav-underline:focus-visible::after {
+    transform: scaleX(1);
+  }
+
+  /* Frosted label pills that sit on top of imagery */
+  .pill-frost {
+    background-color: rgba(0, 0, 0, 0.12);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+  }
+
+  .pill-light {
+    background-color: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /**
+   * 信息图（尺码表一类）：小屏按 --plate-min 的宽度渲染，父容器横向滚动。
+   * 用自定义属性而非内联 min-width —— 内联样式会盖过 md 断点，
+   * 导致小屏宽度一路撑到桌面尺寸、把页面顶出横向滚动条。
+   */
+  .plate-scroll {
+    min-width: var(--plate-min, 880px);
+  }
+
+  @media (min-width: 768px) {
+    .plate-scroll {
+      min-width: 0;
+    }
+  }
+}
