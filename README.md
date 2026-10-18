@@ -5,6 +5,8 @@
 
 React 19 + Vite 7 + TypeScript + Tailwind CSS 4，无 UI 库、无动画库、无路由库（`src/lib/router.tsx` 是自研的约 100 行实现）。
 
+**线上**：https://chenjing-portfolio.vercel.app ｜ **仓库**：https://github.com/jingchan0729-bit/chenjing-portfolio（推 `main` 即自动重新部署）
+
 ---
 
 ## 快速开始
@@ -82,7 +84,7 @@ src/
 | `contact.email` | 联系邮箱，留空则不渲染 mailto（不会出现占位地址） |
 | `contact.links` | 有主页/社交账号就填 `{ label, href }`，留空不渲染，避免死链 |
 
-**部署上线后**：`index.html` 里的 `og:image` / `og:url` 目前是根相对路径，需要换成带域名的绝对地址，否则分享卡片抓不到预览图。
+**换域名时**：`index.html` 里的 `canonical` / `og:url` / `og:image` 是绝对地址（分享卡片只认绝对地址，相对路径抓不到图），`public/robots.txt` 与 `public/sitemap.xml` 里也有域名，**这四处的域名要一起改**。
 
 ### 作品（`src/data/projects.ts`）
 
@@ -190,6 +192,8 @@ src/
 
 - 构建命令 `npm run build`，输出目录 `dist`。
 - 直接连仓库即可。`vercel.json` 与 `public/_redirects` 已配 SPA 回退，`/work/chips` 直接刷新不会 404。
+- 已上线 Vercel，连的是 GitHub 仓库 `jingchan0729-bit/chenjing-portfolio`，推 `main` 触发自动部署。
+- `vercel.json` 的 SPA 回退正则里额外排除了 `robots.txt` 与 `sitemap.xml`——不排除的话它们会被重写成 `index.html`，搜索引擎拿到的是个 HTML 页面。
 
 ### 任意静态服务器 / Nginx
 
@@ -207,7 +211,7 @@ location / {
 export default defineConfig({ base: '/<repo>/', /* ... */ })
 ```
 
-**上线前还可以补**（当前没有）：`public/robots.txt`、`public/sitemap.xml`。两者都需要先确定域名，需要的话告诉我，我一起加上。
+`public/robots.txt`（允许全站抓取 + 指向 sitemap）与 `public/sitemap.xml`（六条路由）已建好，域名写的是上面的 Vercel 地址，换域名时记得同步。
 
 ---
 
