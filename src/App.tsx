@@ -27,7 +27,10 @@ export default function App() {
   const { path, hash } = useRoute();
   const slug = path.startsWith("/work/") ? decodeURIComponent(path.slice("/work/".length)) : null;
   const project = slug ? getProject(slug) : undefined;
-  const notFound = Boolean(slug) && !project;
+  // 只认识 "/" 和 "/work/<有效 slug>"。以前只在 /work/ 下判 404，
+  // 结果是访问任意瞎写的路径都会渲染出首页 —— 对象存储把 404.html 返回给
+  // /abc 时，浏览器地址栏是 /abc、页面却是首页，状态码和内容对不上。
+  const notFound = path !== "/" && !project;
   const CaseStudy = project?.caseStudy ? caseStudies[project.caseStudy] : undefined;
 
   // 直接访问 /#about 这类链接时，首帧滚到锚点

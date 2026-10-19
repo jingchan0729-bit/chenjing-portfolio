@@ -92,7 +92,19 @@ export function prerenderRoutes(): Plugin {
         written.push(`work/${project.slug}/index.html`);
       }
 
-      this.info(`预渲染 ${written.length} 个项目页：${written.join(", ")}`);
+      // 对象存储的静态网站托管没有通配回退，只认一个「404 文档」。
+      // 不给它准备实体文件的话，访问错路径会看到 OSS 自己的 XML 报错页。
+      // 这里复用同一份 index.html 壳子，加载后 React 按当前路径渲染 NotFound。
+      const notFound = indexHtml
+        .replace(/<title>[\s\S]*?<\/title>/i, `<title>${esc("页面不存在 — 陈靖 CHEN JING®")}</title>`)
+        .replace(/<link[^>]*?rel=["']canonical["'][^>]*?\/?>/i, "")
+        // og 标签是给分享卡片用的，404 页不该被分享，一并去掉
+        .replace(/<meta[^>]*?property=["']og:[^>]*?\/?>/gi, "")
+        // 用插入而不是替换：首页本来没有 robots 标签，替换会静默失效
+        .replace(/<\/head>/i, '  <meta name="robots" content="noindex">\n  </head>');
+      await writeFile(path.join(outDir, "404.html"), notFound, "utf8");
+
+      this.info(`预渲染 ${written.length} 个项目页 + 404.html：${written.join(", ")}`);
     },
   };
 }
